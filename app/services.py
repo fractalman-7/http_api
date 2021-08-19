@@ -3,8 +3,8 @@ from decimal import Decimal
 
 from fastapi import HTTPException
 
-from config import CURRENCY_CODES_URL, CURRENCY_RATES_URL
-from utils import fetch_raw_data, parse_currency_codes, parse_currency_rate
+from app.config import CURRENCY_CODES_URL, CURRENCY_RATES_URL
+from app.utils import fetch_raw_data, parse_currency_codes, parse_currency_rate
 
 
 async def get_currency_codes() -> set[str]:

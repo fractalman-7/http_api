@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi import FastAPI, HTTPException, Query
 
-from services import get_currency_codes, get_currency_rate
+from app.services import get_currency_codes, get_currency_rate
 
 app = FastAPI()
 
