@@ -10,6 +10,8 @@ from app.config import NUMBER_OF_CONNECTION_ATTEMPTS
 
 
 async def fetch_raw_data(url: str, params: dict[str, str] = None) -> str:
+    """Receiving raw data from external api, if connection is not established, reconnection occurs"""
+
     async with ClientSession() as client:
         connected = False
         attempt = 0
@@ -28,6 +30,8 @@ async def fetch_raw_data(url: str, params: dict[str, str] = None) -> str:
 
 
 def parse_currency_codes(raw_data: str) -> set[str]:
+    """Retrieves currency codes from xml"""
+
     root = ElementTree.fromstring(raw_data)
     currency_codes = set()
     for elem in root.findall("Item/ISO_Char_Code"):
@@ -38,6 +42,8 @@ def parse_currency_codes(raw_data: str) -> set[str]:
 
 
 def parse_currency_rate(raw_data: str, code: str) -> Optional[str]:
+    """Retrieves currency rate from xml"""
+
     root = ElementTree.fromstring(raw_data)
     elem = root.find(f"Valute[CharCode='{code}']")
     if elem is not None:
