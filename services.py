@@ -1,22 +1,27 @@
 from datetime import date
+from decimal import Decimal
+
 from fastapi import HTTPException
 
-currency_rates = {
-    date(2021, 8, 2): {"USD": 73.1388, "EUR": 86.9913},
-    date(2021, 8, 17): {"USD": 73.3920, "EUR": 86.5072},
-}
+from config import CURRENCY_CODES_URL, CURRENCY_RATES_URL
+from utils import fetch_raw_data, parse_currency_codes, parse_currency_rate
 
 
-async def get_currency_codes() -> list[str]:
+async def get_currency_codes() -> set[str]:
     """Returns currency codes"""
 
-    return ["USD", "EUR", ]
+    raw_xml = await fetch_raw_data(CURRENCY_CODES_URL)
+    currency_codes = parse_currency_codes(raw_xml)
+    return currency_codes
 
 
-async def get_currency_rate(code: str, for_date: date) -> float:
+async def get_currency_rate(code: str, for_date: date) -> Decimal:
     """Returns the currency rate relative to the RUB"""
 
-    try:
-        return currency_rates[for_date][code]
-    except KeyError:
-        raise HTTPException(status_code=400, detail="Invalid parameters")
+    formatted_date = for_date.strftime("%d/%m/%Y")
+    raw_xml = await fetch_raw_data(CURRENCY_RATES_URL, params={"date_req": formatted_date})
+
+    rate = parse_currency_rate(raw_xml, code)
+    if rate is None:
+        raise HTTPException(status_code=400, detail=f"No data on currency {code} for {for_date}")
+    return Decimal(rate)

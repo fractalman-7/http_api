@@ -16,6 +16,6 @@ async def currency_codes():
 async def currency_rates_diff(code: str, date1: date, date2: date):
     if date1 <= date2 and code in await get_currency_codes():
         diff = abs(await get_currency_rate(code, date1) - await get_currency_rate(code, date2))
-        return round(diff, 4)
+        return diff
     else:
         raise HTTPException(status_code=400, detail="Invalid parameters")
