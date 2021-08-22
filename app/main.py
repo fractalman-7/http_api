@@ -1,11 +1,14 @@
 from datetime import date
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.services import get_currency_codes, get_currency_rate
 from app.utils import http_client
+from app import config
 
-app = FastAPI()
+app = FastAPI(title=config.PROJECT_NAME, debug=config.DEBUG, version=config.VERSION)
+app.add_middleware(CORSMiddleware, allow_origins=config.ALLOWED_HOSTS)
 
 
 @app.on_event("shutdown")
