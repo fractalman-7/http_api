@@ -1,32 +1,33 @@
+from asyncio import sleep
 from typing import Optional
 from urllib.parse import urlparse
 from xml.etree import ElementTree
-from asyncio import sleep
 
 from aiohttp import ClientSession, ClientConnectionError
 from fastapi import HTTPException
 
 from app.config import NUMBER_OF_CONNECTION_ATTEMPTS
 
+http_client = ClientSession()
+
 
 async def fetch_raw_data(url: str, params: dict[str, str] = None) -> str:
     """Receiving raw data from external api, if connection is not established, reconnection occurs"""
 
-    async with ClientSession() as client:
-        connected = False
-        attempt = 0
-        while not connected:
-            try:
-                async with client.get(url, params=params) as response:
-                    connected = True
-                    return await response.text()
-            except ClientConnectionError:
-                attempt += 1
-            if attempt > NUMBER_OF_CONNECTION_ATTEMPTS:
-                break
-            await sleep(0.3)
-        hostname = urlparse(url).hostname
-        raise HTTPException(400, f"Failed to connection with {hostname}")
+    connected = False
+    attempt = 0
+    while not connected:
+        try:
+            async with http_client.get(url, params=params) as response:
+                connected = True
+                return await response.text()
+        except ClientConnectionError:
+            attempt += 1
+        if attempt > NUMBER_OF_CONNECTION_ATTEMPTS:
+            break
+        await sleep(0.3)
+    hostname = urlparse(url).hostname
+    raise HTTPException(400, f"Failed to connection with {hostname}")
 
 
 def parse_currency_codes(raw_data: str) -> set[str]:

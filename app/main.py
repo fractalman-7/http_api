@@ -3,8 +3,14 @@ from datetime import date
 from fastapi import FastAPI, HTTPException, Query
 
 from app.services import get_currency_codes, get_currency_rate
+from app.utils import http_client
 
 app = FastAPI()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await http_client.close()
 
 
 @app.get("/currency_codes", response_model=list[str])
