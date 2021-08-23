@@ -17,7 +17,7 @@ async def shutdown():
     await http_client.close()
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def main():
     html_content = f"""
     <html>
