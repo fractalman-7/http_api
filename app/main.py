@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse
 from app import config
 from app.services import get_currency_codes, get_currency_rate
 from app.utils import http_client
+from app.schemas import CurrencyRateDifferenceModel
 
 app = FastAPI(title=config.PROJECT_NAME, debug=config.DEBUG, version=config.VERSION)
 app.add_middleware(CORSMiddleware, allow_origins=config.ALLOWED_HOSTS)
@@ -40,15 +41,17 @@ async def currency_codes():
     return await get_currency_codes()
 
 
-@app.get("/currency_rates_diff", response_model=float)
-async def currency_rates_diff(
+@app.get("/currency_rate_diff", response_model=CurrencyRateDifferenceModel)
+async def currency_rate_difference(
         code: str = Query(..., regex=r"^[A-Z]{3}$", description="ISO currency code"),
         date1: date = Query(..., description="First date"),
         date2: date = Query(..., description="Second date")
 ):
-    """Getting the difference in the currency rate between two dates"""
+    """Returns exchange rates for two dates and their difference"""
 
     if date1 < date2 and code in await get_currency_codes():
-        diff = abs(await get_currency_rate(code, date1) - await get_currency_rate(code, date2))
-        return diff
+        rate1 = await get_currency_rate(code, date1)
+        rate2 = await get_currency_rate(code, date2)
+        diff = abs(rate1 - rate2)
+        return CurrencyRateDifferenceModel(rate1=rate1, rate2=rate2, diff=diff)
     raise HTTPException(status_code=400, detail="Invalid parameters")
