@@ -23,5 +23,6 @@ async def get_currency_rate(code: str, for_date: date) -> Decimal:
 
     rate = parse_currency_rate(raw_xml, code)
     if rate is None:
-        raise HTTPException(status_code=400, detail=f"No data on currency {code} for {for_date}")
+        formatted_date = for_date.strftime("%d.%m.%Y")
+        raise HTTPException(status_code=400, detail=f"No data on currency {code} for {formatted_date}")
     return Decimal(rate)
