@@ -41,7 +41,7 @@ async def main():
 
 @app.get("/currency_codes", response_model=list[str])
 async def currency_codes():
-    """Getting a list of all available currencies"""
+    """Return list of all available currencies"""
 
     return await get_currency_codes()
 
