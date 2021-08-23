@@ -8,7 +8,23 @@ from fastapi import HTTPException
 
 from app.config import NUMBER_OF_CONNECTION_ATTEMPTS
 
-http_client = ClientSession()
+
+class HTTPClient:
+    session: Optional[ClientSession] = None
+
+    async def open_session(self):
+        if self.session is not None:
+            await self.close_session()
+        self.session = ClientSession()
+
+    async def close_session(self):
+        await self.session.close()
+        self.session = None
+
+    def get_session(self) -> ClientSession:
+        return self.session
+
+http_client = HTTPClient()
 
 
 async def fetch_raw_data(url: str, params: dict[str, str] = None) -> str:
@@ -18,7 +34,8 @@ async def fetch_raw_data(url: str, params: dict[str, str] = None) -> str:
     attempt = 0
     while not connected:
         try:
-            async with http_client.get(url, params=params) as response:
+            session = http_client.get_session()
+            async with session.get(url, params=params) as response:
                 connected = True
                 return await response.text()
         except ClientConnectionError:

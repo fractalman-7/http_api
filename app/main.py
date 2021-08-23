@@ -13,9 +13,14 @@ app = FastAPI(title=config.PROJECT_NAME, debug=config.DEBUG, version=config.VERS
 app.add_middleware(CORSMiddleware, allow_origins=config.ALLOWED_HOSTS)
 
 
+@app.on_event("startup")
+async def startup():
+    await http_client.open_session()
+
+
 @app.on_event("shutdown")
 async def shutdown():
-    await http_client.close()
+    await http_client.close_session()
 
 
 @app.get("/", response_class=HTMLResponse)
